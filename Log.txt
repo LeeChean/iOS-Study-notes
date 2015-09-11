@@ -21,3 +21,62 @@
 	  
 
 2、下面根据iOS知识框架图先过一遍基础知识。UIKit框架基本都是一些UI控件的使用，可以先看一遍斯坦福白胡子爷爷的视频教程。
+
+
+
+
+**********************************
+2015年9月11日10:44:08
+**********************************
+
+1、看斯坦福教程第4讲，碰到了一个新概念，property list，下面就研究研究它。简单的说，就是一个通过键值对存储信息的配置文件，app运行起来后可以读取里面的信息。但注意：值可以是String、Array、Dictionary、Boolean、Data、Date、Number类型。
+至于iOS是如何保存的先暂时一放，总之这个文件用来存放一些数据信息，app可以通过代码操作里面的数据。property list在iOS和OS X中都可以使用，具体参考官方文档Property List Programming Guide。
+   property list一般用来保存少量的数据，即少于几百K的数据，如果要存储大量的，且结构比较复杂的数据，则使用归档(Archive)。
+
+
+2、先了解一下什么是xib文件：
+   iOS和OS X中都有这个东西。是Interface Builder的图形界面设计文档，类似于visual studio中的图形界面，可以拖拽一些可见元素到app中，如windows、views、controls和menus等，还可以拖一些不可见的元素，如controllers，及view和controller
+之间的关联。app会将这些信息保存到nib文件中，而且相比写代码的方式更方便。
+   类似的还有一个nib文件，不过是在Xcode3.0之前版本中使用的。nib全称是NeXT Interface Builder,xib是xml nib。
+   
+3、教授讲到了Attribute String，然后查阅官网，了解Attribute String是何许东西？有NSAttributedString和NSMutableAttributedString连个类，表示带属性的字符串，这些属性包括字体、字间距等样式。
+
+4、发现看教授的视频效果不是很理想，有些知识点还是不懂。需要额外再查资料。一会是Foundation一会又是UIKit，这些到底是什么，之间又有什么关系呢？还是先弄清楚iOS（或OS X）整个的架构吧。其实可以分为5层：
+   Application：
+   这层就是我们自己写的app，可以调下面四层的东西。
+   Cocoa Touch：
+   这层主要解决和用户交互的问题，如界面显示、用户点击、拖拽、触摸屏幕等等。这层有个重要的框架，UIKit，需要详细了解。
+   Media：
+   这层主要解决多媒体和手机设备的交互。
+   Core Services:
+   这层可以访问一些底层的iOS服务，如访问文件，数据类型，网络服务等等。这层有个重要的框架，Foundation，需要详细了解。
+   Core OS：
+   这层完成管理内存、线程、文件系统、网络、各个框架的进程间通信等任务。这也是iOS开发者能接触的最底层。
+   
+5、下面就来详细看下Foundation里又有什么东西。重点搞清楚下面几个概念：
+   常用的结构体：
+       这些是Foundation框架为我封装好的结构体，方便我们使用，并不是OC的基础类型。另外注意一点，结构体不是对象，所以在栈上分配空间，不是堆上。另外变量名前不用加*号。
+       主要是NSRange、NSPoint、NSSize、NSRect等。
+       1）NSRange
+	      ① 创建
+		     NSRange range = {2,3};
+			 NSRange range = NSMakeRange(3,5);
+	      ② 其他常用方法见官方文档
+   日期
+   
+   字符串
+   
+   数组
+   
+   字典
+   
+   装箱和拆箱
+   
+   反射
+   
+   拷贝
+   
+   文件操作
+   
+   归档
+   
