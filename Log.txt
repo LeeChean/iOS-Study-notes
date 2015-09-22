@@ -41,7 +41,7 @@
    
 3、教授讲到了Attribute String，然后查阅官网，了解Attribute String是何许东西？有NSAttributedString和NSMutableAttributedString连个类，表示带属性的字符串，这些属性包括字体、字间距等样式。
 
-4、发现看教授的视频效果不是很理想，有些知识点还是不懂。需要额外再查资料。一会是Foundation一会又是UIKit，这些到底是什么，之间又有什么关系呢？还是先弄清楚iOS（或OS X）整个的架构吧。其实可以分为5层：
+4、发现看教授的视频效果不是很理想，有些知识点讲的很快而且内容有限，需要额外再查资料才能弄懂。一会是Foundation一会又是UIKit，这些到底是什么，之间又有什么关系呢？还是先弄清楚iOS（或OS X）整个的架构吧。其实可以分为5层：
    Application：
    这层就是我们自己写的app，可以调下面四层的东西。
    Cocoa Touch：
@@ -51,10 +51,11 @@
    Core Services:
    这层可以访问一些底层的iOS服务，如访问文件，数据类型，网络服务等等。这层有个重要的框架，Foundation，需要详细了解。
    Core OS：
-   这层完成管理内存、线程、文件系统、网络、各个框架的进程间通信等任务。这也是iOS开发者能接触的最底层。
+   这层完成管理内存、线程、文件系统、网络、各个框架的进程间通信等任务。这是iOS开发者能接触的最底层。
    
-5、下面就来详细看下Foundation里又有什么东西。重点搞清楚下面几个概念：
-   常用的结构体：
+5、 下面就来详细看下Foundation里又有什么东西。重点搞清楚下面几个概念：
+    参考http://www.cnblogs.com/kenshincui/p/3885689.html
+    常用的结构体：
        这些是Foundation框架封装好的结构体，方便我们使用，并不是OC的基础类型。另外注意一点，结构体不是对象，在栈上分配空间，不是堆上。所以变量名前不用加*号。
        主要是NSRange、NSPoint、NSSize、NSRect等。
        1) NSRange
@@ -79,22 +80,147 @@
 		     NSRect rect = NSMakeRect(1,2,5,6);
 			 NSRect表示二维空间里的一个矩形，第一个参数是x坐标，第二个参数是y坐标，前两个参数可以看做一个点，画矩形的起始点，第三个参数是width，第四个参数是height，后两个参数可以看做是一个NSSize。
 			 
-   日期
-       
+    日期
+       NSDate
    
-   字符串
+    字符串
+	   NSString
+	   
+    数组
+       NSArray
+	   注意：只能存储对象类型，基本类型和结构体不能作为元素放入其中。
+	   
+    字典
+       NSDictionary
+	   注意：只能存储对象类型，基本类型和结构体不能作为元素放入其中。
+	   
+    装箱和拆箱
+	    和C#中的装箱和拆箱概念类似，OC中装箱一般是将基本数据类型转化为NSNumber，拆箱是把NSNumber转化为具体的基本数据类型。
+	    C#中装箱可以自动完成，即可以直接把基本类型的变量赋给object对象，但在OC中装箱需要手动实现，即调用NSNumber对应的方法进行转化，如下：
+			NSNumber *number = [NSNumber numberWithChar:'a'];  //装箱，将char类型转化成NSNumber类型，其实就是'a'对应的ASCII码。numberWithChar是一个类方法
+			char char = [number charValue];                    //拆箱，将NSNumber类型转化为char基本数据类型。charValue是一个实例方法。
+	
+	    其实在新版的OC中，有种更简便的装箱方法,@符号：
+		NSNumber *number = @100;
+	   
+	    注意：NSNumber只能对基本数据类型进行装箱、拆箱，结构体只能通过NSValue进行装箱、拆箱。NSValue是NSNumber的父类，可以对任何数据类型进行装箱、拆箱操作。
+	    下面看一下Foundation为我们提供的几种常用结构体的装箱、拆箱方法：
+	        NSPoint:
+				CGPoint point1 = CGPointMake(10,20);
+				NSValue *pointObj = [NSValue valueWithPoint:point1];
+				
+				CGPoint point2 = [pointObj pointValue];
+	   
+			NSSize:
+				NSSize size1 = NSMakeSize(5,6);
+				NSValue *sizeObj = [NSValue valueWithSize:size1];
+				
+				NSSize size2 = [sizeObj sizeValue];
+				
+			NSRect:
+				NSRect rect1 = NSMakeRect(1,2,5,9);
+				NSValue *rectObj = [NSValue valueWithRect:rect1];
+				
+				NSRect rect2 = [rectObj rectValue];
+				
+		对于我们自定义的结构体，需要调用NSValue的下述方法进行装箱、拆箱：
+			#import <Foundation/Foundation.h>
+
+			typedef struct {
+				int year;
+				int month;
+				int day;
+			} Date;
+
+			//NSNumber是NSValue的子类，而NSValue可以包装任何类型，包括结构体
+			void test(){
+				//如果我们自己定义的结构体包装
+				Date date = {2014,2,28};
+				char *type = @encode(Date);      //@encode(aType)可以返回aType类型的C字符串(char *)的表示。
+				/*这里需要注意：
+					C语言中没有string类型，字符串有3种定义方法:
+					1、char str[] = "HelloObjective-C"; //通过字符数组
+					2、char *str = "HelloObjective-C";  //通过字符指针，str指向一个存放字符串"HelloObjective-C"的连续地址单元的首地址。
+					3、#define str "HelloObjective-C";  //通过宏定义
+				*/
+				NSValue *value3 = [NSValue value:&date withObjCType:type];//第一参数传递结构体地址，第二个参数传递类型字符串，注意：第二个参数不能直接硬编码写成"Date"，必须通过@encode()方法。
+				NSArray *array2 = [NSArray arrayWithObject:value3];
+				NSLog(@"%@",array2);
+				/*结果：
+				(
+					"<de070000 02000000 1c000000>"
+				)
+				*/
+    
+				Date date2;
+				[value3 getValue:&date2];//取出对应的结构体，注意没有返回值
+				//[value3 objCType]//取出包装内容的类型
+				NSLog(@"%i,%i,%i",date2.year,date2.month,date2.day); //结果：2014,2,28
+			}
+
+			int main(int argc, const char * argv[]) {
+				test();
+				return 0;
+			}
+				
+    反射
+		常用的方法有:
+			isKindOfClass:class                   //判断一个对象是否为某种类型
+			isMemberOfClass:class                 //判断一个对象是否是某个类的实例对象
+			conformsToProtocol:@protocol()        //是否实现了某个协议
+			respondsToSelector:@selector()        //是否存在某个方法
+			
+			Class myClass = NSClassFromString(@"NSString");        //根据类名生成类对象
+			
+			
+		注意：这些方法都是NSObject的，由于NSObject是所有类型的基类，所以基本上所有类型都可以调用这个方法。
    
-   数组
+    拷贝
+		理解深拷贝、浅拷贝的概念
    
-   字典
+    文件操作
+		NSFileManager文件管理器是专门用于文件管理的类，可以获取当前程序所在目录、创建目录、删除目录、改变当前目录、遍历整个目录、判断文件是否存在、文件是否可读、判断两个文件内容是否相等、文件重命名、读取文件属性、删除文件等等。
+		具体例子参考http://www.cnblogs.com/kenshincui/p/3885689.html
    
-   装箱和拆箱
-   
-   反射
-   
-   拷贝
-   
-   文件操作
-   
-   归档
-   
+    归档
+		归档其实就是序列化，将对象保存到硬盘，解档其实就是反序列化，将硬盘文件还原成对象。归档就是数据存储的过程。在iOS中数据的存储有五种方式：
+		1、xml属性列表
+			就是把对象存储到一个plist文件中，是个xml文档，也叫xml序列化。操作起来比较简单，但只有下列的对象调用writeToFile方法，才会将对象保存到一个xml文件中：
+			NSArray、NSMutableArray、NSDictionary、NSMutableDictionary
+			其他的对象如NSString、NSNumber、NSData即使有这个方法，但存储的也不是xml格式，不属于plist归档。
+			另外这种方式是明文保存，安全性不高。
+			解档时调用arrayWithContentsOfFile或dictionaryWithContentsOfFile
+			plist可以用XCode直接打开。
+			
+		2、NSUserDefaults
+			原理和plist一样，不过这个是Foundation为我们封装好的，不用自己写代码存入文件、从文件中读取，直接操作NSUserDefault的方法就行了，Foundation会自动存入应用程序内置的一个plist文件里，一般用来存储轻量级的本地数据，这是最常
+			用，也是最简便的保存数据的方法。
+			
+		3、NSKeyedArchiver归档
+			把对象存储到一个arc文件中，可以操作OC的任何类型的对象，但自定义的对象必须实现NSCoding协议，而且是密文存储。但arc文档不能用XCode直接打开，即使打开也全是密文，需要通过代码解档后才能看到里面的内容。
+			具体又可以分为两种：
+			单个对象归档：
+				NSString *path = @"/tmp/test.arc";
+				NSString *str = @"HelloObjective-C";
+				[NSKeyedArchiver archiveRootObject:str toFile:path];
+				NSString *str2 = [NSKeyedUnarchiver unarchiveObjectWithFile:path];
+				NSLog(@"%@",str2);
+			多个对象归档：
+				具体例子参考http://www.cnblogs.com/kenshincui/p/3885689.html
+			
+		4、SQLite
+			嵌入式数据库，是MySql的精简版。要使用SQlite，需要引入一个动态库。注意libsqlite3.0.dylib只是个链接，总是指向最新的sqlite3动态库，而libsqlite3.dylib是真正的动态库文件，建议使用前者，如果库更新了，则引用不需要做任何更改。
+			这里暂时只做简单的了解，知道有这么一个东西就行。
+		
+		5、Core Data
+			面向对象方式的嵌入式数据库，Core Data是一个框架，涉及的术语比较多，先了解一下吧，参考http://blog.csdn.net/q199109106q/article/details/8563438/或官方文档。
+			其实类似于Poco框架，通过Core Data可以将OC对象转化成数据，保存到SQLite数据库文件中，也能够将保存在数据库中的数据还原成OC对象，而且不需要编写任何SQL语句。如此看来还是先等SQLite熟悉后再看这块，先弄懂原生Sql语句的运行
+			方式。
+			
+		注意：iOS中是无法直接连接Sql Server或Oracle数据库的，因为要连接到这些数据库，客户端必须安装相应的数据库驱动程序，而这些数据库的驱动程序没有iOS版的，都是PC版的，iOS能直接访问的数据库只有上述的5种。
+		
+	KVC和KVO	
+		
+6、	UIKit框架
+	对Foundation框架有了基本的了解，下面开始熟悉UIKit框架。这个框架主要用来构建UI，
+		
