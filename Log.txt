@@ -55,14 +55,32 @@
    
 5、下面就来详细看下Foundation里又有什么东西。重点搞清楚下面几个概念：
    常用的结构体：
-       这些是Foundation框架为我封装好的结构体，方便我们使用，并不是OC的基础类型。另外注意一点，结构体不是对象，所以在栈上分配空间，不是堆上。另外变量名前不用加*号。
+       这些是Foundation框架封装好的结构体，方便我们使用，并不是OC的基础类型。另外注意一点，结构体不是对象，在栈上分配空间，不是堆上。所以变量名前不用加*号。
        主要是NSRange、NSPoint、NSSize、NSRect等。
-       1）NSRange
+       1) NSRange
 	      ① 创建
 		     NSRange range = {2,3};
 			 NSRange range = NSMakeRange(3,5);
-	      ② 其他常用方法见官方文档
+			 表示一个范围，第一个参数是起始下标，第二个参数是长度。
+	      ② 常用方法见官方文档
+		2) NSPoint
+		  ① 创建
+		     NSPoint point = NSMakePoint(2,5);
+			 注意一点，NSMakePoint方法的参数是CGFloat类型，这种类型在32位机器上会转成float类型，在64位机器上会转成double类型，所以兼容性更好些。写法上和普通的浮点型数字没有区别。
+			 表示笛卡尔积里的一个点。回顾一下啥是笛卡尔积，指任意两个集合X和Y，从X中选一个元素a，从Y中选一个元素b，则{a,b}就表示集合X和集合Y的笛卡尔积里的一个元素。NSPoint结构就表示这样的一个元素。
+			 由NSRange和NSPoint可知，无论是范围还是点都是宽泛的定义，范围可以用在字符串里，也可以用在数组里，点可以表示x坐标和y坐标上的一个点，也可以表示其他的含义。适度的抽象，可大大的提高代码的可重用性。可以借鉴
+			 Objective-C中定义结构的思路。
+	    3) NSSize
+		  ① 创建
+		     NSSize size = NSMakeSize(5,6);
+			 NSSize表示二维空间的大小，第一个参数是width宽，第二个参数是height高，都是CGFloat类型。
+		4) NSRect
+		  ① 创建
+		     NSRect rect = NSMakeRect(1,2,5,6);
+			 NSRect表示二维空间里的一个矩形，第一个参数是x坐标，第二个参数是y坐标，前两个参数可以看做一个点，画矩形的起始点，第三个参数是width，第四个参数是height，后两个参数可以看做是一个NSSize。
+			 
    日期
+       
    
    字符串
    
